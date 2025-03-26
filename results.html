@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Fitness Results</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2196F3;
+            --background-color: #f5f5f5;
+            --text-color: #333;
+            --border-color: #ddd;
+            --shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .hero-section {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1517836357463-d25dfeac3438?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 100px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(76, 175, 80, 0.2), rgba(33, 150, 243, 0.2));
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero-section h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .button-container {
+            position: sticky;
+            top: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4CAF50, #2196F3);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .btn i {
+            font-size: 18px;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to right,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.3) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            transform: rotate(45deg);
+            transition: 0.5s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn:hover::after {
+            left: 100%;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .metric-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 10px 0;
+        }
+
+        .metric-label {
+            font-size: 1.1em;
+            color: var(--text-color);
+            margin-bottom: 5px;
+        }
+
+        .metric-unit {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .bmi-category {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-top: 10px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .underweight { background: #e3f2fd; color: #1565c0; }
+        .normal { background: #e8f5e9; color: #2e7d32; }
+        .overweight { background: #fff3e0; color: #ef6c00; }
+        .obese { background: #ffebee; color: #c62828; }
+
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 60px 20px;
+            }
+
+            .hero-section h1 {
+                font-size: 2em;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .button-container {
+                flex-direction: column;
+                padding: 15px;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero-section">
+        <div class="hero-content">
+            <h1>Your Fitness Results</h1>
+            <p>Here's your personalized fitness and nutrition overview</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="button-container">
+            <a href="meal-plan.html" class="btn">
+                <i class="fas fa-utensils"></i>
+                View Meal Plan
+            </a>
+            <a href="workout-plan.html" class="btn">
+                <i class="fas fa-dumbbell"></i>
+                View Workout Plan
+            </a>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-label">BMI</div>
+                <div class="metric-value" id="bmiValue">-</div>
+                <div class="bmi-category" id="bmiCategory">-</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">BMR (Basal Metabolic Rate)</div>
+                <div class="metric-value" id="bmrValue">-</div>
+                <div class="metric-unit">calories/day</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">TDEE (Total Daily Energy Expenditure)</div>
+                <div class="metric-value" id="tdeeValue">-</div>
+                <div class="metric-unit">calories/day</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">Target Calories</div>
+                <div class="metric-value" id="targetCaloriesValue">-</div>
+                <div class="metric-unit">calories/day</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">Protein Target</div>
+                <div class="metric-value" id="proteinTargetValue">-</div>
+                <div class="metric-unit">grams/day</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Helper functions
+        function calculateBMI(weight, height) {
+            // Convert height from cm to meters
+            const heightInMeters = height / 100;
+            // Calculate BMI
+            const bmi = weight / (heightInMeters * heightInMeters);
+            return bmi.toFixed(1);
+        }
+
+        function calculateBMR(weight, height, age, gender) {
+            // Mifflin-St Jeor Equation
+            let bmr;
+            if (gender === 'male') {
+                bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5;
+            } else {
+                bmr = (10 * weight) + (6.25 * height) - (5 * age) - 161;
+            }
+            return Math.round(bmr);
+        }
+
+        function calculateTDEE(bmr, activityLevel) {
+            const activityMultipliers = {
+                sedentary: 1.2,
+                light: 1.375,
+                moderate: 1.55,
+                very: 1.725,
+                extra: 1.9
+            };
+            return Math.round(bmr * activityMultipliers[activityLevel]);
+        }
+
+        function adjustCaloriesForGoal(tdee, fitnessGoal) {
+            switch(fitnessGoal) {
+                case 'weightLoss':
+                    return Math.round(tdee - 500);
+                case 'muscleGain':
+                    return Math.round(tdee + 500);
+                case 'maintenance':
+                    return tdee;
+                default:
+                    return tdee;
+            }
+        }
+
+        function calculateProteinTarget(weight, fitnessGoal) {
+            // Protein per kg of body weight based on goal
+            const proteinMultiplier = fitnessGoal === 'muscleGain' ? 2.2 : 1.8;
+            return Math.round(weight * proteinMultiplier);
+        }
+
+        function getBMICategory(bmi) {
+            if (bmi < 18.5) return { text: 'Underweight', class: 'underweight' };
+            if (bmi < 25) return { text: 'Normal', class: 'normal' };
+            if (bmi < 30) return { text: 'Overweight', class: 'overweight' };
+            return { text: 'Obese', class: 'obese' };
+        }
+
+        // Get stored form data
+        const formData = JSON.parse(localStorage.getItem('fitnessData'));
+        if (!formData) {
+            window.location.href = 'fitness.html';
+        }
+
+        // Calculate metrics
+        const bmi = calculateBMI(formData.weight, formData.height);
+        const bmr = calculateBMR(formData.weight, formData.height, formData.age, formData.gender);
+        const tdee = calculateTDEE(bmr, formData.activityLevel);
+        const targetCalories = adjustCaloriesForGoal(tdee, formData.fitnessGoal);
+        const proteinTarget = calculateProteinTarget(formData.weight, formData.fitnessGoal);
+
+        // Display metrics
+        document.getElementById('bmiValue').textContent = bmi;
+        const bmiCategory = getBMICategory(parseFloat(bmi));
+        const bmiCategoryElement = document.getElementById('bmiCategory');
+        bmiCategoryElement.textContent = bmiCategory.text;
+        bmiCategoryElement.className = 'bmi-category ' + bmiCategory.class;
+
+        document.getElementById('bmrValue').textContent = bmr;
+        document.getElementById('tdeeValue').textContent = tdee;
+        document.getElementById('targetCaloriesValue').textContent = targetCalories;
+        document.getElementById('proteinTargetValue').textContent = proteinTarget;
+    </script>
+</body>
+</html> 
